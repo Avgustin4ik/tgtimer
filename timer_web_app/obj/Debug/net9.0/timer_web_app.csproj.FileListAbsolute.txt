@@ -32,3 +32,4 @@ D:\repo\tg\tgtimer\timer_web_app\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger
 D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_web_app.csproj.AssemblyReference.cache
 D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_web_app.MvcApplicationPartsAssemblyInfo.cs
 D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_we.3C1A45FC.Up2Date
+D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_web_app.sourcelink.json
