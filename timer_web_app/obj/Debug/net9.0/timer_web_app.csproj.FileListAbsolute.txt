@@ -33,3 +33,8 @@ D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_web_app.csproj.AssemblyR
 D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_web_app.MvcApplicationPartsAssemblyInfo.cs
 D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_we.3C1A45FC.Up2Date
 D:\repo\tg\tgtimer\timer_web_app\obj\Debug\net9.0\timer_web_app.sourcelink.json
+D:\repo\tg\tgtimer\timer_web_app\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
+D:\repo\tg\tgtimer\timer_web_app\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+D:\repo\tg\tgtimer\timer_web_app\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
+D:\repo\tg\tgtimer\timer_web_app\bin\Debug\net9.0\Npgsql.dll
+D:\repo\tg\tgtimer\timer_web_app\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
