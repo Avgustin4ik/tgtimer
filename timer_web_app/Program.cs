@@ -21,6 +21,8 @@ builder.Services.AddDbContext<TimersDbContext>(option =>
     }
 });
 
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
