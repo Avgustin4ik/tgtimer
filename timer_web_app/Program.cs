@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
-using timer_web_app;
 using timer_web_app.Database;
+using timer_web_app.TimerService;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer(); // Often used for minimal APIs
@@ -20,7 +20,7 @@ builder.Services.AddDbContext<TimersDbContext>(option =>
         obj.EnableRetryOnFailure();
     }
 });
-
+builder.Services.AddHostedService<TimerSchedulerService>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -34,7 +34,10 @@ if (app.Environment.IsDevelopment())
     }
 }
 
-async Task<IResult> AddTimerAsync(HttpContext ctx, [FromQuery] TimeSpan duration, TimersDbContext db)
+async Task<IResult> AddTimerAsync(HttpContext ctx,
+    [FromQuery] TimeSpan duration,
+    TimersDbContext db,
+    [FromServices] ITimerSchedulerService timerService)
 {
     if (duration <= TimeSpan.Zero) return Results.BadRequest("/api/timers/ -- duration must be > 0");
 
@@ -48,6 +51,7 @@ async Task<IResult> AddTimerAsync(HttpContext ctx, [FromQuery] TimeSpan duration
         IsFinished = false
     };
     db.Add(entityEntry);
+    timerService.Set(duration, userId, null);
     await db.SaveChangesAsync();
     return Results.Created($"/api/timers/{userId}", entityEntry);
 }
