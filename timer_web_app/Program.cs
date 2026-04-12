@@ -51,8 +51,8 @@ async Task<IResult> AddTimerAsync(HttpContext ctx,
         IsFinished = false
     };
     db.Add(entityEntry);
-    timerService.Set(duration, userId, null);
     await db.SaveChangesAsync();
+    timerService.Set(duration, userId);
     return Results.Created($"/api/timers/{userId}", entityEntry);
 }
 

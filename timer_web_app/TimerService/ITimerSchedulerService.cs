@@ -4,8 +4,8 @@ using Database;
 
 public interface ITimerSchedulerService
 {
-    public void Set(TimeSpan duration, string? userId, Action? callback);
+    public void Set(TimeSpan duration, string? userId);
     public bool TryRemove(TimerEntity timer);
-    public void ClearAll();
+    public Task ClearAll(CancellationToken token);
     public void RestoreAllTasksFromDb();
 }

@@ -5,9 +5,17 @@ namespace timer_web_app.TimerService;
 
 public class TimerSchedulerService : ITimerSchedulerService, IHostedService
 {
-    private ConcurrentDictionary<string, Timer> _timers;
+    private ConcurrentDictionary<string, Timer>? _timers = new ConcurrentDictionary<string, Timer>();
+    private readonly ILogger<TimerSchedulerService> _logger;
+    private readonly TimersDbContext _dbContext;
 
-    public void Set(TimeSpan duration, string? userId, Action? callback)
+    public TimerSchedulerService(TimersDbContext dbContext, ILogger<TimerSchedulerService> logger)
+    {
+        _dbContext = dbContext;
+        _logger = logger;
+    }
+
+    public void Set(TimeSpan duration, string? userId)
     {
         if (duration <= TimeSpan.Zero || duration == Timeout.InfiniteTimeSpan) 
             throw new ArgumentOutOfRangeException(nameof(duration));
@@ -16,15 +24,15 @@ public class TimerSchedulerService : ITimerSchedulerService, IHostedService
             //TODO update timer or throw error?
             throw new InvalidOperationException("User has already been set");
         }
-        var timer = new Timer(state => TimerExpireCallback(callback, state), null, duration, TimeSpan.MaxValue);
+        var timer = new Timer(state => TimerExpireCallback(state), null, duration, TimeSpan.MaxValue);
         _timers[userId] = timer;
     }
     
-    private void TimerExpireCallback(Action? callback, object? state)
+    private void TimerExpireCallback(object? state)
     {
         var timer = (Timer)state;
         timer?.DisposeAsync(); 
-        callback?.Invoke();
+        //todo invoke SendMessage to Telegram Bot callback
     }
     
     public bool TryRemove(TimerEntity timer)
@@ -32,24 +40,40 @@ public class TimerSchedulerService : ITimerSchedulerService, IHostedService
         return _timers.TryRemove(timer.UserId, out var t);
     }
 
-    public void ClearAll()
+    public async Task ClearAll(CancellationToken token)
     {
-        _timers?.Clear();
+        if (_timers == null)
+        {
+            return;
+        }
+        var taskToDispose = _timers.Select(x => Task.Run(() => x.Value.DisposeAsync(), token));
+        await Task.WhenAll(taskToDispose);
+        _logger.LogInformation("All timers disposed during cleaning");
     }
 
     public void RestoreAllTasksFromDb()
     {
-        throw new NotImplementedException();
+        _timers ??= new ConcurrentDictionary<string, Timer>();
+        _timers.Clear();
+        foreach (var dbTimerRecord in _dbContext.Timers.Where(x => !x.IsFinished))
+        {
+            Set(dbTimerRecord.EndsAt - dbTimerRecord.CreatedAt, dbTimerRecord.UserId);
+        }
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _timers ??= new ConcurrentDictionary<string, Timer>();
+        _timers.Clear();
+        //TODO do i need to restore all data from db?
+        RestoreAllTasksFromDb();
+        _logger.LogInformation("TimerSchedulerService StartAsync complete");
         return Task.CompletedTask;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        return Task.CompletedTask;
+        await ClearAll(cancellationToken);
+        _logger.LogInformation("TimerSchedulerService StopAsync complete");
     }
 }
