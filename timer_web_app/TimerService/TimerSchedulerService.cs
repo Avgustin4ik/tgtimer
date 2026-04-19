@@ -5,7 +5,7 @@ namespace timer_web_app.TimerService;
 
 public class TimerSchedulerService : ITimerSchedulerService, IHostedService
 {
-    private ConcurrentDictionary<string, Timer>? _timers = new ConcurrentDictionary<string, Timer>();
+    private ConcurrentDictionary<string, Timer> _timers = new ConcurrentDictionary<string, Timer>();
     private readonly ILogger<TimerSchedulerService> _logger;
     private readonly TimersDbContext _dbContext;
 
@@ -19,6 +19,10 @@ public class TimerSchedulerService : ITimerSchedulerService, IHostedService
     {
         if (duration <= TimeSpan.Zero || duration == Timeout.InfiniteTimeSpan) 
             throw new ArgumentOutOfRangeException(nameof(duration));
+        if(userId == null) 
+            throw new ArgumentNullException(nameof(userId));
+        if(_timers == null) 
+            throw new InvalidOperationException("Timer timers have not been initialized");
         if (_timers.ContainsKey(userId))
         {
             //TODO update timer or throw error?
@@ -60,6 +64,8 @@ public class TimerSchedulerService : ITimerSchedulerService, IHostedService
             Set(dbTimerRecord.EndsAt - dbTimerRecord.CreatedAt, dbTimerRecord.UserId);
         }
     }
+
+    public ConcurrentDictionary<string, Timer> CachedTimers => _timers;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {

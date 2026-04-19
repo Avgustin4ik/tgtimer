@@ -76,13 +76,6 @@ async Task<IResult> DeleteTimer(HttpContext context, [FromQuery] string id, Time
 
 app.MapDelete("/api/timers/", DeleteTimer);
 
-static string? GetUserId(HttpContext ctx)
-{
-    return ctx.Request.Headers["X-User-Id"].FirstOrDefault()
-           ?? ctx.Request.Query["userId"].FirstOrDefault()
-           ?? "test-user-" + Guid.NewGuid().ToString("N")[..8];
-}
-
 app.MapGet("/api/timers/{userId}", (HttpContext ctx, TimersDbContext db, [FromQuery] string userId) =>
 {
     userId = GetUserId(ctx);
@@ -90,7 +83,16 @@ app.MapGet("/api/timers/{userId}", (HttpContext ctx, TimersDbContext db, [FromQu
 });
 
 #if DEBUG
-app.MapGet("api/debug/all-timers", (TimersDbContext db) => Results.Ok((object?)db.Timers))
+app.MapGet("api/debug/timers", (TimersDbContext db) => Results.Ok((object?)db.Timers))
     .WithName("DebugAllTimers");
+app.MapGet("api/debug/timers/cached", (ITimerSchedulerService service) => Results.Ok((object?)service.CachedTimers)); 
 #endif
 app.Run();
+return;
+
+static string? GetUserId(HttpContext ctx)
+{
+    return ctx.Request.Headers["X-User-Id"].FirstOrDefault()
+           ?? ctx.Request.Query["userId"].FirstOrDefault()
+           ?? "test-user-" + Guid.NewGuid().ToString("N")[..8];
+}

@@ -1,5 +1,6 @@
 namespace timer_web_app.TimerService;
 
+using System.Collections.Concurrent;
 using Database;
 
 public interface ITimerSchedulerService
@@ -8,4 +9,5 @@ public interface ITimerSchedulerService
     public bool TryRemove(TimerEntity timer);
     public Task ClearAll(CancellationToken token);
     public void RestoreAllTasksFromDb();
+    ConcurrentDictionary<string, Timer> CachedTimers { get; }
 }
